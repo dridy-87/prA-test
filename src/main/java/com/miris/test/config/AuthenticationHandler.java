@@ -36,6 +36,7 @@ public class AuthenticationHandler implements HandlerInterceptor {
         //session 확
         log.info("sesssionID:::" + sessionID);
         
+        
        
         if(redisTemplate.opsForValue().get(SESSION_PREFIX + sessionID) == null) {
         	new ObjectMapper().writeValue(

@@ -1,4 +1,4 @@
-package com.miris.test.exception.advice;
+package com.miris.test.exception;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -35,8 +35,15 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestControllerAdvice
-public class TestErrorControllerAdvice {
+public class GlobalExceptionHandler {
 	
+	
+	@ExceptionHandler(CustomException.class)
+	public ResponseEntity<ErrorDto> handleRuntimeException(CustomException ex){
+		return setError(ex.getErrorCode());
+	}
+	
+
 	/**
 	 * 
 	 * @Method Name : handleRuntimeException
@@ -50,7 +57,7 @@ public class TestErrorControllerAdvice {
 	 * @변경이력 :
 	 */
 	@ExceptionHandler(RuntimeException.class)
-	public ResponseEntity<Map<String, Object>> handleRuntimeException(HttpServletRequest request, HttpServletResponse response, Exception ex){
+	public ResponseEntity<ErrorDto> handleRuntimeException(HttpServletRequest request, HttpServletResponse response, Exception ex){
 		return setError(request, response, ex);
 	}
 	
@@ -67,18 +74,11 @@ public class TestErrorControllerAdvice {
 	 * @변경이력 :
 	 */
 	@ExceptionHandler(Exception.class)
-	public ResponseEntity<Map<String, Object>> handleException(HttpServletRequest request, HttpServletResponse response, Exception ex) {
+	public ResponseEntity<ErrorDto> handleException(HttpServletRequest request, HttpServletResponse response, Exception ex) {
 		return setError(request, response, ex);
 	}
 	
 	
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Map<String, Object>> handleAccessDeniedException(HttpServletRequest request, HttpServletResponse response, AccessDeniedException e) {
-        log.error("handleAccessDeniedException", e);
-        return setError(request, response, e);
-    }
-	
-
 	/**
 	 * @Method Name : setError
 	
@@ -90,7 +90,7 @@ public class TestErrorControllerAdvice {
 	
 	 * @변경이력 :
 	 */
-	private ResponseEntity<Map<String, Object>> setError(HttpServletRequest request, HttpServletResponse response,
+	private ResponseEntity<ErrorDto> setError(HttpServletRequest request, HttpServletResponse response,
 			Exception ex) {
 		// TODO Auto-generated method stub
 		
@@ -99,21 +99,16 @@ public class TestErrorControllerAdvice {
 		 String formatedNow = now.format(formatter);            
 		 
 		 ErrorDto errorDto = ErrorDto.builder()
-					 .path(request.getRequestURI())
 					 .message(ex.getMessage())
-					 .errorTm(formatedNow)
 					 .build();
 
-		
-		Map<String, Object> model = new HashMap<String, Object>();
-		model.put("path", errorDto.getPath());
-		model.put("status", errorDto.getStatus());
-		model.put("error", errorDto.getError());
-		model.put("message", errorDto.getMessage());
-		model.put("regDt", errorDto.getErrorDt());
-		model.put("regTm", errorDto.getErrorTm());
-		
-		
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(model);
+		 log.info("global ::::");
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDto);
+	}
+	
+	private ResponseEntity<ErrorDto> setError(ErrorCode errorCode) {
+		// TODO Auto-generated method stub
+		log.info("custom ::::");
+		return ErrorDto.toResponseEntity(errorCode);
 	}
 }

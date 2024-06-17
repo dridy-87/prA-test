@@ -1,5 +1,13 @@
 package com.miris.test.dto;
 
+import java.time.LocalDateTime;
+import java.util.Map;
+
+import org.springframework.http.ResponseEntity;
+
+import com.miris.test.exception.CustomException;
+import com.miris.test.exception.ErrorCode;
+
 import lombok.Builder;
 import lombok.Data;
 
@@ -19,15 +27,18 @@ import lombok.Data;
 @Data
 public class ErrorDto {
 	
+	private final LocalDateTime timestamp = LocalDateTime.now();
 	private int status;
-	
-	private String path;
-	
 	private String error;
-	
 	private String message;
-	
-	private String errorDt;
-	
-	private String errorTm;
+
+	public static ResponseEntity<ErrorDto>  toResponseEntity(ErrorCode errorCode) {
+        return ResponseEntity
+                .status(errorCode.getStatus())
+                .body(ErrorDto.builder()
+                        .status(errorCode.getStatus().value())
+                        .message(errorCode.getMessage())
+                        .build()
+                );
+    }
 }
